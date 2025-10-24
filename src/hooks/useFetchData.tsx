@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
-export const  useFetchData= <T,>(fetchFn: () => Promise<T[]>) => {
+export const useFetchData = <T,>(
+  fetchFn: () => Promise<T[]>,
+) => {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,7 +16,7 @@ export const  useFetchData= <T,>(fetchFn: () => Promise<T[]>) => {
         const res = await fetchFn();
         if (isMounted) setData(res);
       } catch (err) {
-        console.log(err)
+        console.error(err);
         setError("Error cargando datos");
       } finally {
         setLoading(false);
@@ -29,4 +31,4 @@ export const  useFetchData= <T,>(fetchFn: () => Promise<T[]>) => {
   }, [fetchFn]);
 
   return { data, loading, error, setData };
-}
+};

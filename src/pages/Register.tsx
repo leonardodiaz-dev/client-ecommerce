@@ -1,23 +1,22 @@
 import { useForm } from "react-hook-form"
 import Button from "../components/common/Button"
-import type { UsuarioForm } from "../interfaces/usuario"
+import type { UsuarioFormData } from "../interfaces/usuario"
 import { createUsuario } from "../services/usuarios"
 import type { ApiError } from "../interfaces/apiError"
 
 const Register = () => {
-    const { register, handleSubmit,reset, formState: { errors,isValid } } = useForm<UsuarioForm>({
-        mode:'onChange'
+    const { register, handleSubmit, reset, formState: { errors, isValid } } = useForm<UsuarioFormData>({
+        mode: 'onChange'
     })
 
-    const onSubmit = async (data: UsuarioForm) => {
+    const onSubmit = async (data: UsuarioFormData) => {
         try {
-            const response = await createUsuario({...data,rolNombre:"Cliente"})
+            const response = await createUsuario({ ...data, rolNombre: "Cliente" })
             console.log(response)
+            reset()
         } catch (error) {
             const apiError = error as ApiError
             console.log(apiError.message)
-        }finally{
-            reset()
         }
     }
     return (

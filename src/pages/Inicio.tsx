@@ -1,4 +1,3 @@
-import NavBar from "../components/layout/NavBar"
 
 type CategoriaSeccion = {
     id: number;
@@ -39,22 +38,13 @@ const secciones: CategoriaSeccion[] = [
 const Inicio = () => {
 
     return (
-        <div className="min-h-screen bg-gray-50 text-gray-800">
-            <NavBar />
-
-            <section className="relative h-[400px] flex items-center justify-center">
-                <img
-                    src="./banner.jpg"
-                    alt="Banner"
-                    className="absolute inset-0 w-full h-full object-cover"
-                />
+        <>
+            <section className="relative h-screen flex items-center justify-center bg-[url('./fondo-pantalla.jpg')] bg-cover bg-center">
                 <div className="absolute inset-0 bg-black/40"></div>
                 <h1 className="relative text-4xl md:text-6xl font-bold text-white z-10">
                     Bienvenido a nuestra tienda
                 </h1>
             </section>
-
-
 
             <div className="max-w-7xl mx-auto px-6 py-12 space-y-12">
                 {secciones.map((sec) => (
@@ -80,7 +70,7 @@ const Inicio = () => {
                     </section>
                 ))}
             </div>
-        </div>
+        </>
     )
 }
 

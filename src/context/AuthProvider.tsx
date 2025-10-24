@@ -1,6 +1,7 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type { Usuario } from "../interfaces/usuario";
 import { AuthContext } from "./AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface MyComponentProps {
     children: ReactNode;
@@ -11,6 +12,17 @@ export const AuthProvider = ({ children }: MyComponentProps) => {
     const [user, setUser] = useState<Usuario | null>(null);
     const [loading, setLoading] = useState(true);
     const [token, setToken] = useState<string | null>(null);
+    const navigate = useNavigate()
+
+    const logout = useCallback(() => {
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem("expires_at");
+        navigate("/login")
+    }, [navigate])
+
 
     useEffect(() => {
         const savedUser = localStorage.getItem('user');
@@ -26,7 +38,7 @@ export const AuthProvider = ({ children }: MyComponentProps) => {
             }
         }
         setLoading(false);
-    }, []);
+    }, [logout]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -40,7 +52,7 @@ export const AuthProvider = ({ children }: MyComponentProps) => {
         }, 60 * 1000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [logout]);
 
     const login = (userData: Usuario, newToken: string, expiresAt: number) => {
         setUser(userData);
@@ -50,16 +62,9 @@ export const AuthProvider = ({ children }: MyComponentProps) => {
         localStorage.setItem("expires_at", expiresAt.toString());
     };
 
-    const logout = () => {
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        localStorage.removeItem("expires_at");
-    };
 
     return (
-        <AuthContext.Provider value={{ user,setUser, token, isAuthenticated: !!user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, setUser, token, isAuthenticated: !!user, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

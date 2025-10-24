@@ -4,13 +4,14 @@ export interface Categoria {
     subcategorias:SubCategoria[]
 }
  
-interface SubCategoria {
+export interface SubCategoria {
     idSubcategoria:number
     nombre:string
     subsubcategorias:SubSubCategoria[]
 }
 
-interface SubSubCategoria {
-    idSubSubCategoria:number
+export interface SubSubCategoria {
+    idSubSubcategoria:number
     nombre:string
+    subcategoria:SubCategoria
 }

@@ -19,8 +19,9 @@ const Login = () => {
         try {
             const response = await loginUsuario(data.email, data.contrasena)
             login(response.user, response.token, response.expiresAt)
+            if(response.user.rol.nombre === 'Administrador') navigate("/panel/articulos")
+            if(response.user.rol.nombre === 'Cliente') navigate("/")    
             console.log(response)
-            navigate("/")
         } catch (error) {
             const apiError = error as ApiError
             console.log(apiError.message)
@@ -60,7 +61,7 @@ const Login = () => {
                     >
                         Ingresar
                     </Button>
-                    <p>¿No tienes una cuenta ? <span className="text-[#B8860B] hover:underline cursor-pointer">Registrate</span></p>
+                    <p onClick={() => navigate("/register")}>¿No tienes una cuenta ? <span className="text-[#B8860B] hover:underline cursor-pointer">Registrate</span></p>
                 </form>
             </div>
         </div>
