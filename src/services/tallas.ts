@@ -5,8 +5,8 @@ import type { ApiError } from "../interfaces/apiError";
 
 export const getAllTallas = async (): Promise<Talla[]> => {
     try {
-        const response = await apiPublic.get("/tallas")
-        return response.data
+        const response = await apiPublic.get("/sizes")
+        return response.data.data
     } catch (err) {
         const error = err as AxiosError<ApiError>;
 

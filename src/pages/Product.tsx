@@ -10,9 +10,10 @@ import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
 import AddedToCartItem from "../components/cart/AddedToCartItem";
 import { type RootState } from "../store/store";
+import { useToast } from "../context/useToast";
 
 type SelectedVariante = {
-    idVariante: number
+    id: number
     talla: string | null;
     color: string | null;
     stock: number;
@@ -28,12 +29,13 @@ const Product = () => {
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
     const [selectedVariante, setSelectedVariante] = useState<SelectedVariante>({
-        idVariante: 0,
+        id: 0,
         talla: null,
         color: null,
         stock: 0,
     });
-    const productoAgregado = useSelector((state: RootState) => selectProductoById(state, selectedVariante.idVariante));
+    const { showToast } = useToast()
+    const productoAgregado = useSelector((state: RootState) => selectProductoById(state, selectedVariante.id));
     const fetchProducto = useCallback(
         () => (slug ? getArticuloBySlug(slug) : Promise.resolve(null)),
         [slug],
@@ -43,11 +45,11 @@ const Product = () => {
 
     useEffect(() => {
         if (articulo &&
-            articulo.variantes[0].talla === "N/A" &&
-            articulo.variantes[0].color === "N/A") {
+            articulo.variantes[0]?.talla === "N/A" &&
+            articulo.variantes[0]?.color === "N/A") {
             setSelectedVariante(prev => ({
                 ...prev,
-                idVariante: articulo.variantes[0].idVariante,
+                idVariante: articulo.variantes[0].id,
                 stock: articulo.variantes[0].stock
             })
             )
@@ -60,11 +62,15 @@ const Product = () => {
         }
     }, [productoAgregado]);
 
-    const handleAdd = () =>
-        setCantidad((prev) => (prev < selectedVariante.stock ? prev + 1 : prev));
+    const handleAdd = () => {
+        if (!selectedVariante.id) return;
+        setCantidad(prev => (prev < selectedVariante.stock ? prev + 1 : prev));
+    };
 
-    const handleSubtract = () =>
-        setCantidad((prev) => (prev > 1 ? prev - 1 : 1));
+    const handleSubtract = () => {
+        if (!selectedVariante.id) return;
+        setCantidad(prev => (prev > 1 ? prev - 1 : 1));
+    };
 
 
     if (loadinArticulo) return <OverlayLoader />;
@@ -80,7 +86,9 @@ const Product = () => {
             (hasTallas && !selectedVariante.talla) ||
             (hasColores && !selectedVariante.color)
         ) {
-            alert("Por favor selecciona una talla y/o color antes de continuar.");
+            showToast("Por favor selecciona una talla antes de continuar.", {
+                type: 'info'
+            })
             return;
         }
 
@@ -89,7 +97,7 @@ const Product = () => {
         }
 
         const producto: ArticuloSeleccionado = {
-            idVariante: selectedVariante.idVariante,
+            idVariante: selectedVariante.id,
             idProducto: articulo.id,
             nombre: articulo.nombre,
             stock: selectedVariante.stock,
@@ -118,7 +126,7 @@ const Product = () => {
                         <li>{">"}</li>
                         <li>
                             <Link
-                                to={`/category/${articulo?.subcategoria.idSubcategoria}/${articulo?.subcategoria.nombre}`}
+                                to={`/search?categoria=${articulo?.subcategoria.nombre}`}
                                 className="hover:underline text-gray-600"
                             >
                                 {articulo?.subcategoria.nombre}
@@ -153,21 +161,26 @@ const Product = () => {
                                         .filter((v) => v.talla && v.talla !== "N/A")
                                         .map((v) => (
                                             <p
-                                                key={v.idVariante}
-                                                className={`border ${selectedVariante.talla === v.talla
-                                                    ? "border-gray-700"
-                                                    : "border-gray-300"
-                                                    } cursor-pointer p-2 rounded-lg ${v.stock === 0 ? "opacity-50 cursor-not-allowed" : ""
-                                                    }`}
+                                                key={v.id}
+                                                className={`border p-2 rounded-lg 
+                                                    ${selectedVariante.talla === v.talla ? "border-gray-700" : "border-gray-300"} 
+                                                    ${v.stock === 0 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                                                    `}
+
                                                 onClick={() => {
-                                                    setCantidad(1)
-                                                    if (v.stock > 0) setSelectedVariante((prev) => ({
+                                                    setCantidad(1);
+                                                    if (v.stock === 0) {
+                                                        showToast("Esta talla está agotada.", { type: "info" });
+                                                        return;
+                                                    }
+                                                    setSelectedVariante(prev => ({
                                                         ...prev,
-                                                        idVariante: v.idVariante,
+                                                        id: v.id,
                                                         talla: v.talla,
                                                         stock: v.stock,
-                                                    }))
+                                                    }));
                                                 }}
+
                                             >
                                                 {v.talla}
                                             </p>
@@ -184,7 +197,7 @@ const Product = () => {
                                         .filter((v) => v.color && v.color !== "N/A")
                                         .map((v) => (
                                             <p
-                                                key={`${v.idVariante}-${v.color}`}
+                                                key={`${v.id}-${v.color}`}
                                                 className={`border ${selectedVariante.color === v.color
                                                     ? "border-gray-700"
                                                     : "border-gray-300"
@@ -194,7 +207,7 @@ const Product = () => {
                                                     v.stock > 0 &&
                                                     setSelectedVariante((prev) => ({
                                                         ...prev,
-                                                        idVariante: v.idVariante,
+                                                        id: v.id,
                                                         color: v.color,
                                                         stock: v.stock,
                                                     }))
@@ -217,6 +230,7 @@ const Product = () => {
                             <span className="font-medium text-gray-700">Cantidad:</span>
                             <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                                 <button
+                                    disabled={!selectedVariante.id}
                                     onClick={handleSubtract}
                                     className="px-3 py-1 text-lg font-bold text-gray-600 hover:bg-gray-100"
                                 >
@@ -224,13 +238,20 @@ const Product = () => {
                                 </button>
                                 <span className="px-4 py-1 text-lg font-medium">{cantidad}</span>
                                 <button
+                                    disabled={!selectedVariante.id}
                                     onClick={handleAdd}
                                     className="px-3 py-1 text-lg font-bold text-gray-600 hover:bg-gray-100"
                                 >
                                     +
                                 </button>
                             </div>
-                            <span className="text-sm">{selectedVariante.stock > 0 ? `Maximo ${selectedVariante.stock} unidades` : `Agotado`}</span>
+                            <span className="text-sm">
+                                {selectedVariante.id
+                                    ? selectedVariante.stock === 0
+                                        ? "Esta talla está agotada"
+                                        : `Máximo ${selectedVariante.stock} unidades`
+                                    : ""}
+                            </span>
                         </div>
 
                         <Button

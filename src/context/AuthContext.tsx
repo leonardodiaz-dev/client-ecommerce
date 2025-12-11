@@ -6,7 +6,7 @@ type AuthContextType = {
     setUser:React.Dispatch<React.SetStateAction<Usuario | null>>
     token: string | null;
     isAuthenticated: boolean;
-    login: (userData: Usuario, token: string, expiresAt: number) => void;
+    login: (userData: Usuario, token: string, expiresAt: string) => void;
     logout: () => void;
     loading: boolean;
 };

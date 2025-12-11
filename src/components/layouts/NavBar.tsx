@@ -1,6 +1,5 @@
-import { ChevronDown, ChevronRight, Menu, Search, ShoppingCart, X } from "lucide-react";
-import { useRef, useState } from "react";
-import Drawer from "./Drawer";
+import { ChevronDown, Menu, Search, ShoppingCart, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { Categoria } from "../../interfaces/categoria";
 import { listCategoriasWithSubCategorias } from "../../services/categorias";
 import { useFetchData } from "../../hooks/useFetchData";
@@ -12,79 +11,117 @@ import { busqueda } from "../../services/articulos";
 import OverlayLoader from "../common/OverlayLoader";
 import ResultadosList from "../inicio/ResultadosList";
 import type { Resultados } from "../../interfaces/articulo";
+import DesktopDrawer from "../inicio/DesktopDrawer";
+import MovileDrawer from "../inicio/MovileDrawer";
 
 const NavBar = () => {
 
-    const [search, setSearch] = useState<string>("")
     const navigate = useNavigate()
+    const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
     const [showDropdown, setShowDropdown] = useState(false);
     const [results, setResults] = useState<Resultados | null>(null);
     const [loading, setLoading] = useState(false);
-    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const total = useSelector(totalProductos);
     const { isAuthenticated, user, logout } = useAuth()
     const [open, setOpen] = useState<boolean>(false)
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [hoveredCategoria, setHoveredCategoria] = useState<number | null>(null);
+    const [selectedCategoria, setSelectedCategoria] = useState<number | null>(null);
     const { data: categorias, loading: loadingCategoria, error } = useFetchData<Categoria>(listCategoriasWithSubCategorias);
+    const [inputValue, setInputValue] = useState("");
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setSearch(value);
+        setInputValue(value);
+
+        if (value.length < 2) {
+            setResults(null);
+            setShowDropdown(false);
+            return;
+        }
 
         if (debounceRef.current) clearTimeout(debounceRef.current);
 
         debounceRef.current = setTimeout(async () => {
-            if (value.length < 2) {
-                setResults(null);
-                setShowDropdown(false);
-                return;
-            }
-
             try {
                 setLoading(true);
                 const res = await busqueda(value);
                 setResults(res.resultados);
                 setShowDropdown(true);
-            } catch (error) {
-                console.error(error);
+            } catch (err) {
+                console.error(err);
             } finally {
                 setLoading(false);
             }
         }, 400);
     };
 
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+
+            const value = inputValue.trim();
+            if (!value) return;
+
+            navigate(`/search?q=${value}`);
+
+            setInputValue("");
+
+            setShowDropdown(false);
+
+            if (debounceRef.current) {
+                clearTimeout(debounceRef.current);
+            }
+        }
+    };
+
+
     if (loadingCategoria) return <OverlayLoader />;
     if (error) return <p>{error}</p>;
 
     return (
         <>
-            <header className="bg-[#1E1E1E] text-white">
+            <header className="bg-[#090909] text-white">
                 <div className="flex flex-row justify-between px-3 items-center h-16">
-
-                    <div
-                        className="flex flex-row justify-center items-center cursor-pointer gap-2"
-                        onClick={() => setDrawerOpen(true)}
-                    >
-                        <Menu />
-                        <p className="hidden sm:block">Menu</p>
+                    <div className="flex flex-row gap-5">
+                        <h2 className="text-xl cursor-pointer"
+                            onClick={() => navigate("/")}>NovaShop</h2>
+                        <div
+                            className="flex flex-row cursor-pointer gap-2"
+                            onClick={() => setDrawerOpen(true)}
+                        >
+                            <Menu />
+                            <p className="hidden sm:block">Menu</p>
+                        </div>
                     </div>
 
                     <div className="hidden md:block relative w-72">
                         <input
+                            ref={inputRef}
                             type="text"
                             placeholder="Buscar productos, marcas o categorías..."
                             className="rounded-lg border text-black outline-none py-2 pl-3 pr-16 w-72 bg-white h-10"
-                            value={search}
+                            value={inputValue}
                             onChange={handleChange}
-                            onFocus={() => search.length > 1 && setShowDropdown(true)}
+                            onKeyDown={(e) => handleKeyDown(e)}
+                            onFocus={() => inputValue.length > 1 && setShowDropdown(true)}
                             onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
                         />
 
-                        {search && (
+                        {inputValue && (
                             <button
                                 className="absolute top-2 right-10 cursor-pointer"
-                                onClick={() => setSearch("")}
+                                onClick={() => setInputValue("")}
                             >
                                 <X color="black" />
                             </button>
@@ -114,7 +151,12 @@ const NavBar = () => {
                                     {isAuthenticated ? (
                                         <ul className="py-2 text-sm text-gray-700">
                                             <li>
-                                                <span className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                                                <span className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                                    onClick={() => {
+                                                        setOpen(false)
+                                                        if (user && user.roles.some(u => u.nombre === 'Administrador')) navigate("/panel/articulos")
+                                                        if (user && user.roles.some(u => u.nombre === 'Cliente')) navigate("/myaccount/myProfile")
+                                                    }}>
                                                     Mi cuenta
                                                 </span>
                                             </li>
@@ -176,7 +218,7 @@ const NavBar = () => {
                             type="text"
                             placeholder="Buscar productos..."
                             className="rounded-lg border text-black outline-none py-2 pl-3 pr-10 w-full bg-white h-10"
-                            value={search}
+                            value={inputValue}
                             onChange={handleChange}
                         />
                         <button className="absolute top-0 right-0 h-10 w-10 flex items-center justify-center bg-gray-800 rounded-r-lg">
@@ -187,56 +229,24 @@ const NavBar = () => {
                 </div>
 
             </header>
-            <Drawer isOpen={drawerOpen} onClose={() => { setDrawerOpen(false); setHoveredCategoria(null) }} position="left">
-                <nav className="relative flex">
-                    <ul className="w-64 bg-white">
-                        {categorias.map((c) => (
-                            <li
-                                key={c.idCategoria}
-                                onMouseEnter={() => setHoveredCategoria(c.idCategoria)}
-                                className="flex flex-row justify-between hover:font-semibold hover:bg-gray-200 p-3 hover:border-l-3 rounded-sm 
-                                hover:border-l-[#B8860B] cursor-pointer"
-                            >
-                                <span>{c.nombre}</span>
-                                <ChevronRight className="text-gray-500 hover:text-[#B8860B]" />
-                            </li>
-                        ))}
-                    </ul>
+            {isDesktop ?
+                <DesktopDrawer
+                    drawerOpen={drawerOpen}
+                    setDrawerOpen={setDrawerOpen}
+                    setHoveredCategoria={setHoveredCategoria}
+                    categorias={categorias}
+                    hoveredCategoria={hoveredCategoria}
+                    navigate={navigate}
 
-                    {hoveredCategoria !== null && (
-                        <div
-                            className="absolute left-64 top-0 w-[800px] bg-gray-50 h-auto shadow-lg p-6 grid grid-cols-3 gap-6"
-                        >
-                            {categorias
-                                .find((c) => c.idCategoria === hoveredCategoria)
-                                ?.subcategorias.map((sub) => (
-                                    <div key={sub.idSubcategoria}>
-                                        <h3 className="font-semibold cursor-pointer text-gray-800 mb-2"
-                                            onClick={() => {
-                                                navigate(`/search?categoria=${sub.nombre}`)
-                                                setDrawerOpen(false)
-                                                setHoveredCategoria(null)
-                                            }}>{sub.nombre}</h3>
-                                        <ul className="space-y-1">
-                                            {sub.subsubcategorias.map((ss) => (
-                                                <li
-                                                    key={ss.idSubSubcategoria}
-                                                    className="text-sm text-gray-600 hover:text-blue-600 cursor-pointer"
-                                                    onClick={() => {
-                                                        navigate(`/search?categoria=${ss.nombre}`)
-                                                        setDrawerOpen(false)
-                                                        setHoveredCategoria(null)
-                                                    }}>
-                                                    {ss.nombre}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                ))}
-                        </div>
-                    )}
-                </nav>
-            </Drawer>
+                />
+                : <MovileDrawer
+                    drawerOpen={drawerOpen}
+                    setDrawerOpen={setDrawerOpen}
+                    categorias={categorias}
+                    selectedCategoria={selectedCategoria}
+                    setSelectedCategoria={setSelectedCategoria}
+                    navigate={navigate}
+                />}
         </>
     );
 }

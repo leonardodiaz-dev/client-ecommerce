@@ -1,7 +1,8 @@
 export interface Proveedor {
-    idProveedor:number
+    id:number
     nombre:string
     ruc:string
     direccion:string
     telefono:string
+    estado:boolean
 }

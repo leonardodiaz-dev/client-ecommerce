@@ -1,30 +1,28 @@
-import { useState } from "react";
 import type { TableColumn } from "react-data-table-component";
 import type { Usuario } from "../../interfaces/usuario";
 import DataTable from "react-data-table-component";
-import Modal from "../common/Modal";
-import UsuarioForm from "./UsuarioForm";
-import { SquarePen } from "lucide-react";
-import { useFetchData } from "../../hooks/useFetchData";
-import { getAllUsuarios } from "../../services/usuarios";
 import OverlayLoader from "../common/OverlayLoader";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../store/store";
+import { useEffect } from "react";
+import { fetchUsuarios } from "../../store/usuarioSlice";
 
 const UsuariosTable = () => {
 
-    const { data: usuarios, loading, error } = useFetchData(getAllUsuarios)
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [usuario, setUsuario] = useState<Usuario | null>(null)
+    const distpach = useDispatch<AppDispatch>()
+    const { usuarios, status, error } = useSelector((state: RootState) => state.usuarios)
 
-    const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
+    useEffect(() => {
+        distpach(fetchUsuarios())
+    }, [distpach])
 
-    if (loading) return <OverlayLoader />
+    if (status === 'loading') return <OverlayLoader />
     if (error) return <p>{error}</p>;
 
     const columns: TableColumn<Usuario>[] = [
         {
             name: 'ID',
-            selector: row => row.idUsuario,
+            selector: row => row.id,
             sortable: true,
         },
         {
@@ -54,38 +52,21 @@ const UsuariosTable = () => {
         },
         {
             name: 'ROL',
-            selector: row => row.rol.nombre,
+            selector: row => row.roles.map(r => r.nombre).join(', '),
             sortable: true,
-        },
-        {
-            name: 'EDITAR',
-            cell: row => (
-                <button onClick={() => {
-                    openModal()
-                    setUsuario(row)
-                }}>
-                    <SquarePen className="cursor-pointer h-6 w-6 ml-3" />
-                </button>
-            ),
-            ignoreRowClick: true,
         },
     ];
     return (
         <>
             <div className="max-w-full border border-gray-300 rounded-lg shadow-lg">
                 <DataTable
-                    title="Lista de proveedores"
+                    title="Lista de usuarios"
                     columns={columns}
                     data={usuarios}
                     pagination
                     className="min-w-full"
                 />
             </div>
-            <Modal isOpen={isModalOpen} handleClose={closeModal} title="Editar Usuario" >
-                {isModalOpen && (
-                    <UsuarioForm usuario={usuario} closeModal={closeModal} />
-                )}
-            </Modal>
         </>
     )
 }

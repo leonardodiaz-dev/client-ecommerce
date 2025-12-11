@@ -1,17 +1,35 @@
 export interface Categoria {
-    idCategoria:number
-    nombre:string
-    subcategorias:SubCategoria[]
+    id: number
+    nombre: string
+    estado: boolean
+    subcategories: SubCategoria[]
 }
- 
+
+export type CategoriaFormData = Omit<Categoria, 'id' | 'subcategorias'>
+
 export interface SubCategoria {
-    idSubcategoria:number
-    nombre:string
-    subsubcategorias:SubSubCategoria[]
+    id: number
+    nombre: string
+    estado: boolean
+    category_id:number
+    subsubcategories: SubSubCategoria[]
+    category: Categoria
+}
+
+export type SubCategoriaFormData = {
+    nombre: string
+    category_id: number
 }
 
 export interface SubSubCategoria {
-    idSubSubcategoria:number
-    nombre:string
-    subcategoria:SubCategoria
+    id: number
+    nombre: string
+    estado: boolean
+    subcategory_id:number
+    subcategory: SubCategoria
+}
+
+export type SubSubCategoriaFormData = {
+    nombre: string
+    subcategory_id: number
 }

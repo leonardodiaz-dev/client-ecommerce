@@ -12,7 +12,7 @@ type CartCardProps = {
 const CartCard = ({ product }: CartCardProps) => {
     const dispatch = useDispatch<AppDispatch>()
     return (
-        <div className="flex flex-col sm:flex-row justify-between items-center border border-gray-300 gap-4 p-4 rounded-lg shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between bg-white items-center border border-gray-300 gap-4 p-4 rounded-lg shadow-sm">
             
             <img
                 className="w-28 h-28 object-contain"

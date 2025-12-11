@@ -6,7 +6,7 @@ import type { ApiError } from "../interfaces/apiError";
 export const getAllColores = async (): Promise<Color[]> => {
 
     try {
-        const response = await apiPublic.get("/colores")
+        const response = await apiPublic.get("/colors")
         return response.data
     } catch (err) {
         const error = err as AxiosError<ApiError>;

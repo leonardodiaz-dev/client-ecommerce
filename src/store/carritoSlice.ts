@@ -51,6 +51,10 @@ const carritoSlice = createSlice({
             state.carrito = state.carrito.filter(c => c.idVariante !== action.payload)
             updateStore(state.carrito)
         },
+        clearCarrito: (state) => {
+            state.carrito = [];
+            localStorage.removeItem("carrito");
+        },
     }, selectors: {
         totalProductos: (state) => state.carrito.reduce((total, item) => total + item.cantidad, 0),
         totalPrecio: (state) => state.carrito.reduce((total, item) =>
@@ -61,6 +65,6 @@ const carritoSlice = createSlice({
     }
 })
 
-export const { addProduct, deleteProduct, additionProduct, subtractionProduct } = carritoSlice.actions
+export const { addProduct, deleteProduct, additionProduct, subtractionProduct, clearCarrito } = carritoSlice.actions
 export const { totalProductos, totalPrecio, selectProductoById } = carritoSlice.selectors;
 export default carritoSlice.reducer

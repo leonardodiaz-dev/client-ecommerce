@@ -2,10 +2,13 @@ import { useForm } from "react-hook-form"
 import Button from "../common/Button"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { proveedorSchema, type ProveedorFormData } from "../../schemas/proveedorSchema";
-import { createProvedor, existProveedor, updateProveedor } from "../../services/proveedores";
-import type { ApiError } from "../../interfaces/apiError";
+import { existProveedor } from "../../services/proveedores";
 import type { Proveedor } from "../../interfaces/proveedor";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../../store/store";
+import { addProveedor, editProveedor } from "../../store/proveedorSlice";
+import { useToast } from "../../context/useToast";
 
 type Props = {
     proveedor?: Proveedor | null
@@ -13,10 +16,13 @@ type Props = {
 }
 
 const ProveedorForm = ({ proveedor, closeModal }: Props) => {
+
+    const dispatch = useDispatch<AppDispatch>()
     const { register, handleSubmit, reset, formState: { errors, isValid, isSubmitting } } = useForm<ProveedorFormData>({
         resolver: zodResolver(proveedorSchema),
         mode: "onChange"
     });
+    const { showToast } = useToast()
     const [erroRuc, setErrorRuc] = useState<string>("")
 
     useEffect(() => {
@@ -25,10 +31,10 @@ const ProveedorForm = ({ proveedor, closeModal }: Props) => {
 
     const onSubmit = async (data: ProveedorFormData) => {
         const initialData = {
-            nombre:proveedor?.nombre,
-            ruc:proveedor?.ruc,
-            direccion:proveedor?.direccion,
-            telefono:proveedor?.telefono
+            nombre: proveedor?.nombre,
+            ruc: proveedor?.ruc,
+            direccion: proveedor?.direccion,
+            telefono: proveedor?.telefono
         }
 
         const sinCambios = JSON.stringify(initialData) === JSON.stringify(data)
@@ -39,29 +45,38 @@ const ProveedorForm = ({ proveedor, closeModal }: Props) => {
 
         try {
             if (proveedor) {
-                const res = await updateProveedor(proveedor.idProveedor, data)
-                console.log(res)
+                await dispatch(editProveedor({ id: proveedor.id, proveedor: data })).unwrap()
+                showToast("Proveedor editado con exito", {
+                    type: 'success'
+                })
             } else {
-                const res = await createProvedor(data)
-                console.log(res)
+                await dispatch(addProveedor(data)).unwrap()
+                showToast("Proveedor registrado con exito", {
+                    type: 'success'
+                })
             }
             reset()
             closeModal()
         } catch (error) {
-            const apiError = error as ApiError
-            console.log(apiError.message)
+            showToast("Ha ocurrido un error", {
+                type:'error'
+            })
+            console.log(error)
         }
     }
 
     const existRuc = async (ruc: string) => {
-        const res = await existProveedor(ruc, proveedor?.idProveedor)
-        if (res) {
-            setErrorRuc("Ya existe un proveedor con este ruc")
-        } else {
-            setErrorRuc("")
+        try {
+            const res = await existProveedor(ruc, proveedor?.id)
+            if (res) {
+                setErrorRuc("Ya existe un proveedor con este ruc")
+            } else {
+                setErrorRuc("")
+            }
+        } catch (error) {
+            console.log(error)
         }
     }
-
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
 

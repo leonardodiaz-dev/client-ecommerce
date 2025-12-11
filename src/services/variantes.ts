@@ -5,9 +5,10 @@ import type { ApiError } from "../interfaces/apiError";
 
 export const buscarVariante = async (codigo: string): Promise<BuscarVariante[]> => {
     try {
-        const response = await apiPublic.get("/variantes/buscar", {
+        const response = await apiPublic.get("/variants/find", {
             params: { codigo }
         })
+        console.log(response.data)
         return response.data
     } catch (err) {
         const error = err as AxiosError<ApiError>;

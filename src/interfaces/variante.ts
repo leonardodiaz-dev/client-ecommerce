@@ -1,13 +1,13 @@
 export interface BuscarVariante {
-  idVariante:number,
-  articulo: {
+  id:number,
+  article: {
     codigo: string;
     nombre: string;
   };
   color: {
     nombre: string;
   } | null;
-  talla: {
+  size: {
     nombre: string;
   } | null;
   stock: number;

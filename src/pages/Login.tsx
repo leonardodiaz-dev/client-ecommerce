@@ -1,30 +1,34 @@
 import { ArrowLeft } from "lucide-react"
 import Button from "../components/common/Button"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import type { Usuario } from "../interfaces/usuario"
 import { useForm } from "react-hook-form"
 import { loginUsuario } from "../services/usuarios"
-import type { ApiError } from "../interfaces/apiError"
 import { useAuth } from "../context/useAuth"
+import { useState } from "react"
 
 const Login = () => {
 
-    const { register, handleSubmit, formState: { errors, isValid } } = useForm<Pick<Usuario, 'email' | 'contrasena'>>({
+    const { register, handleSubmit, formState: { errors, isValid, isSubmitting } } = useForm<Pick<Usuario, 'email' | 'password'>>({
         mode: 'onChange'
     })
+    const [error, setError] = useState('');
     const { login } = useAuth()
     const navigate = useNavigate()
+    const location = useLocation()
 
-    const onSubmit = async (data: Pick<Usuario, 'email' | 'contrasena'>) => {
+    const onSubmit = async (data: Pick<Usuario, 'email' | 'password'>) => {
         try {
-            const response = await loginUsuario(data.email, data.contrasena)
-            login(response.user, response.token, response.expiresAt)
-            if(response.user.rol.nombre === 'Administrador') navigate("/panel/articulos")
-            if(response.user.rol.nombre === 'Cliente') navigate("/")    
+            const response = await loginUsuario(data.email, data.password)
             console.log(response)
+            login(response.user, response.token, response.expires_at)
+            console.log(response.user.roles.length)
+            if (response.user.roles.length === 2) return navigate('/seleccionar-rol')
+            const redirectPath = location.state?.from?.pathname || "/";
+            navigate(redirectPath, { replace: true });
         } catch (error) {
-            const apiError = error as ApiError
-            console.log(apiError.message)
+            setError('Credenciales incorrectas. Intenta nuevamente.');
+            console.log(error)
         }
     }
 
@@ -48,18 +52,19 @@ const Login = () => {
                     </div>
                     <div className="flex flex-col justify-start w-full">
                         <label htmlFor="correo">Contraseña</label>
-                        <input type="password" id="contrasena" placeholder="********" className="border-1 border-gray-300 w-full rounded-lg px-2 py-2"
-                            {...register("contrasena", { required: "La contraseña es obligatoria" })} />
-                        {errors.contrasena && (
-                            <p className="text-sm text-red-500 mt-1">{errors.contrasena.message}</p>
+                        <input type="password" id="password" placeholder="********" className="border-1 border-gray-300 w-full rounded-lg px-2 py-2"
+                            {...register("password", { required: "La contraseña es obligatoria" })} />
+                        {errors.password && (
+                            <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
                         )}
                     </div>
+                    {error && <p className="text-red-500 text-start text-sm">{error}</p>}
                     <Button
                         type="submit"
-                        disabled={!isValid}
-                        className={`${isValid ? 'bg-[#B8860B] text-white' : 'bg-gray-400 text-gray-500'} w-full`}
+                        disabled={!isValid || isSubmitting}
+                        className={`${isValid && !isSubmitting ? 'bg-[#B8860B] text-white' : 'bg-gray-400 text-gray-500'} w-full`}
                     >
-                        Ingresar
+                        { isSubmitting ? '...Cargando':'Ingresar'}
                     </Button>
                     <p onClick={() => navigate("/register")}>¿No tienes una cuenta ? <span className="text-[#B8860B] hover:underline cursor-pointer">Registrate</span></p>
                 </form>

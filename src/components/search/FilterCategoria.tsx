@@ -1,17 +1,18 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import type { SubSubCategoria } from "../../interfaces/categoria";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
     subsubcategorias: SubSubCategoria[]
+    setShowFilters: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const FilterCategoria = ({ subsubcategorias }: Props) => {
+const FilterCategoria = ({ subsubcategorias,setShowFilters }: Props) => {
 
     const [open, setOpen] = useState(true)
     const navigate = useNavigate()
-
+  
     return (
         <div className="border-b border-gray-200 py-3">
             <button
@@ -28,8 +29,11 @@ const FilterCategoria = ({ subsubcategorias }: Props) => {
             >
                 <ul className="flex flex-row flex-wrap gap-2">
                     {subsubcategorias.map((s) => (
-                        <li key={s.idSubSubcategoria} className="bg-gray-200 border-1 cursor-pointer border-gray-400 rounded-lg text-gray-800 p-1"
-                            onClick={() => navigate(`/search?categoria=${s.nombre}`)}
+                        <li key={s.id} className="bg-gray-200 border-1 cursor-pointer border-gray-400 rounded-lg text-gray-800 p-1"
+                            onClick={() => {
+                                navigate(`/search?categoria=${s.nombre}`)
+                                setShowFilters(false)
+                            }}
                         >
                             {s.nombre}
                         </li>

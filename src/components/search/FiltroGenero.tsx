@@ -1,29 +1,27 @@
 import { ChevronDown, ChevronUp } from "lucide-react"
 import type { Genero } from "../../interfaces/genero"
 import { useState } from "react"
-import { useSearchParams } from "react-router-dom"
 
 type FiltroGenereProps = {
     generos: Genero[]
     value?: string
+    generoTmp: string[]
+    setGeneroTmp: React.Dispatch<React.SetStateAction<string[]>>
 }
 
-const FiltroGenero = ({ generos, value }: FiltroGenereProps) => {
+const FiltroGenero = ({ generos, value, generoTmp, setGeneroTmp }: FiltroGenereProps) => {
 
-    const [searchParams, setSearchParams] = useSearchParams();
     const [open, setOpen] = useState(true);
 
     const handleChange = (generoId: number) => {
-        const current = searchParams.get("generoId")?.split(",").filter(Boolean) || [];
-        const updated = current.includes(generoId.toString())
-            ? current.filter((id) => id !== generoId.toString())
-            : [...current, generoId.toString()];
+        const id = generoId.toString();
 
-        searchParams.set("generoId", updated.join(","));
-        if (updated.length === 0) searchParams.delete("generoId")
-        setSearchParams(searchParams);
+        if (generoTmp.includes(id)) {
+            setGeneroTmp(generoTmp.filter((g) => g !== id));
+        } else {
+            setGeneroTmp([...generoTmp, id]);
+        }
     };
-    const selectedIds = searchParams.get("generoId")?.split(",") || [];
 
     const generosFilter = generos.filter(g =>
         value === 'Hombres' ?
@@ -55,14 +53,14 @@ const FiltroGenero = ({ generos, value }: FiltroGenereProps) => {
                 <div className="flex flex-col gap-2 pl-2 pb-2">
                     {generosFilter.map((g) => (
                         <label
-                            key={g.idGenero}
+                            key={g.id}
                             className="flex items-center gap-2 cursor-pointer text-gray-700 hover:text-gray-900"
                         >
                             <input
                                 type="checkbox"
                                 className="w-4 h-4 accent-indigo-600 cursor-pointer"
-                                checked={selectedIds.includes(g.idGenero.toString())}
-                                onChange={() => handleChange(g.idGenero)}
+                                checked={generoTmp.includes(g.id.toString())}
+                                onChange={() => handleChange(g.id)}
                             />
                             {g.nombre}
                         </label>

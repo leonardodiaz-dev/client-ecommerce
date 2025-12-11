@@ -2,8 +2,6 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {
   Home,
-  BarChart2,
-  Settings,
   Menu,
   X,
   Package,
@@ -11,14 +9,16 @@ import {
   PackagePlus,
   Users,
   ChevronDown,
+  Tags,
 } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
 
 export default function AdminLayout() {
+
   const location = useLocation();
+  const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [open, setOpen] = useState<boolean>(false)
-  const navigate = useNavigate()
   const { isAuthenticated, user, logout } = useAuth()
   const links = [
     { to: "/admin/home", label: "Home", icon: <Home size={18} /> },
@@ -26,7 +26,9 @@ export default function AdminLayout() {
     { to: "/panel/articulos", label: "Articulos", icon: <Package size={18} /> },
     { to: "/panel/proveedores", label: "Proveedores", icon: <Store size={18} /> },
     { to: "/panel/ingresos", label: "Ingresos", icon: <PackagePlus size={18} /> },
-    { to: "/admin/settings", label: "Settings", icon: <Settings size={18} /> },
+    { to: "/panel/categorias", label: "Categorias", icon: <Tags size={18} /> },
+    { to: "/panel/subcategorias", label: "Subcategorias", icon: <Tags size={18} /> },
+    { to: "/panel/subsubcategorias", label: "Subsubcategorias", icon: <Tags size={18} /> },
   ];
 
   return (
@@ -87,8 +89,6 @@ export default function AdminLayout() {
             >
               <Menu size={24} />
             </button>
-            <BarChart2 size={20} className="text-[#B8860B]" />
-            <span>E-commerce</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -106,11 +106,15 @@ export default function AdminLayout() {
 
               {open && (
                 <div className="absolute top-10 right-0 mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200 z-20">
-                  {isAuthenticated ? (
+                  {isAuthenticated && (
                     <ul className="py-2 text-sm text-gray-700">
                       <li>
-                        <span className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                          Mi cuenta
+                        <span className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            navigate("/panel/configuracion")
+                            setOpen(false)
+                          }}>
+                          Configuración
                         </span>
                       </li>
                       <li>
@@ -119,25 +123,6 @@ export default function AdminLayout() {
                           onClick={logout}
                         >
                           Logout
-                        </span>
-                      </li>
-                    </ul>
-                  ) : (
-                    <ul className="py-2 text-sm text-gray-700">
-                      <li>
-                        <span
-                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => navigate("/login")}
-                        >
-                          Inicia sesión
-                        </span>
-                      </li>
-                      <li>
-                        <span
-                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => navigate("/register")}
-                        >
-                          Regístrate
                         </span>
                       </li>
                     </ul>

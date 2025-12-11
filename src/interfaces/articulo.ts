@@ -3,25 +3,25 @@ import type { Genero } from "./genero"
 import type { Marca } from "./marca"
 
 export interface Articulo {
-    idArticulo: number
+    id: number
     codigo: string
     nombre: string
     slug: string
-    genero: Genero
-    generoId?: number
-    marca?: Marca
-    marcaId?: number
-    precioVenta: string
+    gender: Genero
+    gender_id:number
+    brand?: Marca
+    brand_id:number
+    precioVenta: number
     imagen?: string
     estado: boolean
-    categoria: string
-    categoriaId?: number
-    subcategoriaId?: number
-    subSubcategoriaId?: number
-    variantes: {
-        idVariante: number
-        colorId: number
-        tallaId: number
+    subsubcategory:SubSubCategoria
+    category_id?: number
+    subcategory_id?: number
+    subsubcategory_id?: number
+    variants: {
+        id: number
+        color_id: number
+        talla_id: number
     }[]
 }
 
@@ -55,7 +55,7 @@ export interface ArticuloSeleccionado {
 }
 
 export interface Variante {
-    idVariante: number
+    id: number
     talla: string
     color: string
     stock: number
@@ -64,15 +64,16 @@ export interface Variante {
 export interface ArticuloFormData {
     nombre: string
     precioVenta: string | null
-    marcaId?: number | null
+    brand_id?: number | null
     imagen: string | null
-    generoId: number | null
-    categoriaId?: number | null
-    subcategoriaId?: number | null
-    subSubcategoriaId?: number | null
-    variantes: {
-        colorId: number | null
-        tallaId: number | null
+    gender_id: number | null
+    category_id?: number | null
+    subcategory_id?: number | null
+    subsubcategory_id?: number | null
+    variants: {
+        id: number| null
+        color_id: number | null
+        size_id: number | null
     }[]
 }
 
@@ -86,4 +87,9 @@ export interface Resultados {
     marcas: Marca[]
     subcategorias: SubCategoria[]
     subsubcategorias: SubSubCategoria[]
+}
+
+export type RangePrecio = {
+    min:string
+    max:string
 }

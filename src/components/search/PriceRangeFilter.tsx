@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Range } from "react-range";
-import { useSearchParams } from "react-router-dom";
 
 type Props = {
   min?: number;
@@ -9,7 +8,8 @@ type Props = {
   currency?: string;
   initialMin?: number;
   initialMax?: number;
-  onChange?: (values: { min: number; max: number }) => void;
+  onChangeMin: (value: string) => void;
+  onChangeMax: (value: string) => void;
 };
 
 export default function PriceRangeFilter({
@@ -19,19 +19,19 @@ export default function PriceRangeFilter({
   currency = "S/",
   initialMin,
   initialMax,
+  onChangeMin,
+  onChangeMax,
 }: Props) {
   const [values, setValues] = useState<number[]>([
     initialMin ?? min,
     initialMax ?? max,
   ]);
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const handleRange = (values:number[]) => {
-    setValues(values)
-    searchParams.set("precioMin", String(values[0]))
-    searchParams.set("precioMax", String(values[1]))
-    setSearchParams(searchParams)
-  }
+ 
+  const handleRange = (newValues: number[]) => {
+    setValues(newValues);
+    onChangeMin(newValues[0].toString());
+    onChangeMax(newValues[1].toString());
+  };
 
   return (
     <div className="w-full max-w-lg p-4 bg-white rounded-2xl shadow-sm">
@@ -54,29 +54,37 @@ export default function PriceRangeFilter({
         max={max}
         values={values}
         onChange={(values) => handleRange(values)}
-        renderTrack={({ props, children }) => (
-          <div
-            {...props}
-            className="h-2 w-full rounded-full bg-gray-200"
-            style={props.style}
-          >
+        renderTrack={({ props, children }) => {
+          const { key, ...rest } = props as any;
+          return (
             <div
-              className="h-2 bg-indigo-500 rounded-full"
-              style={{
-                width: `${((values[1] - values[0]) / (max - min)) * 100}%`,
-                marginLeft: `${((values[0] - min) / (max - min)) * 100}%`,
-              }}
+              {...rest}
+              className="h-2 w-full rounded-full bg-gray-200"
+              style={props.style}
+            >
+              <div
+                className="h-2 bg-indigo-500 rounded-full"
+                style={{
+                  width: `${((values[1] - values[0]) / (max - min)) * 100}%`,
+                  marginLeft: `${((values[0] - min) / (max - min)) * 100}%`,
+                }}
+              />
+              {children}
+            </div>
+          );
+        }}
+        renderThumb={({ props, index }) => {
+          const { key, ...rest } = props as any;
+          return (
+            <div
+              {...rest}
+              key={index}
+              className="w-5 h-5 bg-indigo-500 rounded-full shadow cursor-pointer"
             />
-            {children}
-          </div>
-        )}
-        renderThumb={({ props }) => (
-          <div
-            {...props}
-            className="w-5 h-5 bg-indigo-500 rounded-full shadow cursor-pointer"
-          />
-        )}
+          );
+        }}
       />
+
     </div>
   );
 }

@@ -1,4 +1,4 @@
 export interface Marca {
-    idMarca:number,
+    id:number,
     nombre:string
 }

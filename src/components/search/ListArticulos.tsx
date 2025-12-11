@@ -7,9 +7,9 @@ type Props = {
 
 const ListArticulos = ({ articulos }: Props) => {
     return (
-        <div className='grid grid-cols-4 gap-4'>
+        <div className='grid grid-cols-2 sm:grid-cols-4 gap-4'>
             {articulos.map(a => (
-                <ArticuloCard key={a.idArticulo} articulo={a} />
+                <ArticuloCard key={a.id} articulo={a} />
             ))}
         </div>
     )

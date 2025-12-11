@@ -1,5 +1,5 @@
 export interface Color {
-    idColor:number
+    id:number
     nombre:string
     codigoHex:string
 }

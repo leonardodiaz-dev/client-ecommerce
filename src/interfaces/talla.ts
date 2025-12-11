@@ -1,5 +1,5 @@
 export interface Talla {
-    idTalla:number
+    id:number
     nombre:string
     tipo:string
 }

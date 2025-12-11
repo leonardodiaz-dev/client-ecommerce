@@ -1,28 +1,42 @@
 import { useFieldArray, useForm } from "react-hook-form";
 import { useFetchData } from "../../hooks/useFetchData";
-import { getAllProveedores } from "../../services/proveedores";
-import { useCallback, useState } from "react";
-import type { Proveedor } from "../../interfaces/proveedor";
+import { useCallback, useEffect, useState } from "react";
 import { buscarVariante } from "../../services/variantes";
 import type { BuscarVariante } from "../../interfaces/variante";
 import type { IngresoFormData } from "../../interfaces/ingreso";
 import Button from "../common/Button";
 import { createIngreso } from "../../services/ingresos";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../store/store";
+import { fetchProveedores } from "../../store/proveedorSlice";
+import { useToast } from "../../context/useToast";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
     closeModal: () => void
 }
 
 const IngresoForm = ({ closeModal }: Props) => {
-    const { register, handleSubmit, reset, control, setError, clearErrors, formState: { errors } } = useForm<IngresoFormData>();
 
+    const navigate = useNavigate();
+    const dispatch = useDispatch<AppDispatch>()
+    const proveedores = useSelector((state: RootState) => state.proveedores.proveedores)
+    const { register, handleSubmit, reset, control, setError, clearErrors, formState: { errors } } = useForm<IngresoFormData>();
+    const { showToast } = useToast()
     const { fields, append, remove } = useFieldArray({
         control,
-        name: "detalles",
+        name: "variants",
     });
 
     const [query, setQuery] = useState("");
     const [search, setSearch] = useState("");
+
+    useEffect(() => {
+
+        dispatch(fetchProveedores())
+
+    }, [dispatch])
+
 
     const fetchVariantes = useCallback(
         () => (search ? buscarVariante(search) : Promise.resolve([])),
@@ -30,7 +44,6 @@ const IngresoForm = ({ closeModal }: Props) => {
     );
 
     const { data: variantes, loading: loadingVar } = useFetchData<BuscarVariante>(fetchVariantes);
-    const { data: proveedores } = useFetchData<Proveedor>(getAllProveedores);
 
     const handleBuscar = () => {
         if (query.trim() === "") return alert("Ingrese un código o nombre para buscar");
@@ -38,48 +51,54 @@ const IngresoForm = ({ closeModal }: Props) => {
     };
 
     const onSubmit = async (data: IngresoFormData) => {
-        console.log(data.detalles.length)
-        if (data.detalles.length === 0) {
-            setError("detalles", { type: "manual", message: "Debe agregar al menos una variante antes de registrar" });
+        console.log(data)
+        if (data.variants.length === 0) {
+            setError("variants", { type: "manual", message: "Debe agregar al menos una variante antes de registrar" });
             return;
         }
         try {
-            const res = await createIngreso(data)
-            console.log(res)
+            await createIngreso(data)
+            showToast("Ingreso registrado correctamente", {
+                type: 'success'
+            })
             reset()
             closeModal()
+            navigate(0);
         } catch (error) {
-            if (error instanceof Error) {
-                console.log(error)
-            }
+            showToast("Ha ocurrido un error", {
+                type: 'error'
+            })
+            console.log(error)
+
         }
         console.log("Datos enviados:", data);
     };
 
     const handleSelectVariante = (v: BuscarVariante) => {
-        const existingVariante = fields.some(e => e.varianteId === v.idVariante)
+        const existingVariante = fields.some(e => e.id === v.id)
         if (existingVariante) return alert("Esta variante ya esta seleccionada")
-        append({ varianteId: v.idVariante, cantidad: 1 });
-        clearErrors("detalles");
-        setSearch("");
+        append({ id: v.id, cantidad: 1 });
+        clearErrors("variants");
     };
+
+    const filterProveedores = proveedores.filter(p => p.estado)
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 relative">
             <div>
                 <label className="block mb-1">Proveedor</label>
                 <select
-                    {...register("proveedorId", { required: "El proveedor es obligatorio" })}
+                    {...register("supplier_id", { required: "El proveedor es obligatorio" })}
                     className="border border-gray-300 rounded-lg w-full h-10 px-2"
                 >
                     <option value="">Seleccione un proveedor</option>
-                    {proveedores.map((p) => (
-                        <option key={p.idProveedor} value={p.idProveedor}>
+                    {filterProveedores.map((p) => (
+                        <option key={p.id} value={p.id}>
                             {p.nombre}
                         </option>
                     ))}
                 </select>
-                {errors.proveedorId && <p className="text-red-500">{errors.proveedorId.message}</p>}
+                {errors.supplier_id && <p className="text-red-500">{errors.supplier_id.message}</p>}
             </div>
 
             <div>
@@ -105,14 +124,14 @@ const IngresoForm = ({ closeModal }: Props) => {
                     <ul className="bg-white border border-gray-300 rounded-lg mt-2 w-full max-h-60 overflow-y-auto shadow-lg">
                         {variantes.map((v) => (
                             <li
-                                key={v.idVariante}
+                                key={v.id}
                                 className="px-3 py-2 hover:bg-blue-100 cursor-pointer flex justify-between items-center"
                                 onClick={() => handleSelectVariante(v)}
                             >
                                 <div>
-                                    <p className="font-medium">{v.articulo.nombre}</p>
+                                    <p className="font-medium">{v.article.nombre}</p>
                                     <p className="text-sm text-gray-600">
-                                        {v.articulo.codigo} | {v.color?.nombre ?? "-"} | {v.talla?.nombre ?? "-"}
+                                        {v.article.codigo} | {v.color?.nombre ?? "-"} | {v.size?.nombre ?? "-"}
                                     </p>
                                 </div>
                                 <span className="text-blue-500 text-sm">Agregar</span>
@@ -131,10 +150,10 @@ const IngresoForm = ({ closeModal }: Props) => {
                                 key={item.id}
                                 className="flex justify-between items-center border rounded-lg p-2 bg-gray-50"
                             >
-                                <span>Variante ID: {item.varianteId}</span>
+                                <span>Variante ID: {item.id}</span>
                                 <input
                                     type="number"
-                                    {...register(`detalles.${index}.cantidad`, { valueAsNumber: true })}
+                                    {...register(`variants.${index}.cantidad`, { valueAsNumber: true })}
                                     className="border rounded w-20 text-center"
                                 />
                                 <button
@@ -149,7 +168,7 @@ const IngresoForm = ({ closeModal }: Props) => {
                     </ul>
                 </div>
             )}
-            {errors.detalles && <p className="text-red-500">{errors.detalles.message}</p>}
+            {errors.variants && <p className="text-red-500">{errors.variants.message}</p>}
             <Button type="submit" className="bg-[#B8860B] text-white w-full">
                 Registrar ingreso
             </Button>

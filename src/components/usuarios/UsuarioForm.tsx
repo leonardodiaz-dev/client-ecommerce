@@ -1,8 +1,13 @@
 import { useForm } from "react-hook-form"
 import type { Usuario, UsuarioFormData } from "../../interfaces/usuario"
 import Button from "../common/Button"
-import { createUsuario } from "../../services/usuarios"
 import { useEffect } from "react"
+import { useToast } from "../../context/useToast"
+import { useFetchData } from "../../hooks/useFetchData"
+import { getRoles } from "../../services/roles"
+import { useDispatch } from "react-redux"
+import type { AppDispatch } from "../../store/store"
+import { addUsuario } from "../../store/usuarioSlice"
 
 type UsuarioFormProps = {
     usuario?: Usuario | null
@@ -10,19 +15,24 @@ type UsuarioFormProps = {
 }
 
 const UsuarioForm = ({ usuario, closeModal }: UsuarioFormProps) => {
-    const { register, handleSubmit, reset, formState: { errors, isValid, isSubmitting } } = useForm<UsuarioFormData>({
+
+    const dispatch = useDispatch<AppDispatch>()
+    const { register, handleSubmit, reset, watch, formState: { errors, isValid, isSubmitting } } = useForm<UsuarioFormData>({
         mode: 'onChange'
     })
+    const { showToast } = useToast()
+    const { data: roles, loading } = useFetchData(getRoles)
 
     useEffect(() => {
         reset({ ...usuario })
     }, [reset, usuario])
 
-
     const onSubmit = async (data: UsuarioFormData) => {
         try {
-            const res = await createUsuario({ ...data, rolNombre: "Administrador" })
-            console.log(res)
+            await dispatch(addUsuario(data)).unwrap()
+            showToast('Usuario registrado con exito', {
+                type: 'success'
+            })
             closeModal()
             reset()
         } catch (error) {
@@ -104,11 +114,53 @@ const UsuarioForm = ({ usuario, closeModal }: UsuarioFormProps) => {
                 </div>
             </div>
             <div className="mb-2">
+                <label className="font-semibold">Roles</label>
+
+                {
+                    loading ? (
+                        <div className="flex items-center justify-center bg-white/70 ">
+                            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col gap-1 mt-1">
+                            {roles.map((rol) => (
+                                <label key={rol.id} className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        value={rol.id}
+                                        {...register("rolesId", {
+                                            required: "Debes seleccionar al menos un rol",
+                                        })}
+                                    />
+                                    <span>{rol.nombre}</span>
+                                </label>
+                            ))}
+                        </div>
+                    )
+                }
+
+                {errors.rolesId && (
+                    <p className="text-red-500 text-sm">{errors.rolesId.message}</p>
+                )}
+            </div>
+
+            <div className="mb-2">
                 <label htmlFor="contrasena">Contraseña</label>
                 <input type="password" id="password" placeholder="Contraseña" className="border border-gray-300 w-full rounded-lg px-2 py-2"
-                    {...register("contrasena", { required: 'La contraseña es obligatoria' })} />
-                {errors.contrasena && (
-                    <p className="text-sm text-red-500 mt-1">{errors.contrasena.message}</p>
+                    {...register("password", { required: 'La contraseña es obligatoria' })} />
+                {errors.password && (
+                    <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
+                )}
+            </div>
+            <div className="mb-5">
+                <label htmlFor="contrasena">Confirmar Contraseña</label>
+                <input type="password" id="password_confirmation" placeholder="Confirmar Contraseña" className="border border-gray-300 w-full rounded-lg px-2 py-2"
+                    {...register("password_confirmation", {
+                        required: 'La confirmacion de la contraseña es obligatoria',
+                        validate: (value) => value === watch('password') || 'Las contraseñas no coinciden'
+                    })} />
+                {errors.password_confirmation && (
+                    <p className="text-sm text-red-500 mt-1">{errors.password_confirmation.message}</p>
                 )}
             </div>
             <Button
@@ -118,7 +170,7 @@ const UsuarioForm = ({ usuario, closeModal }: UsuarioFormProps) => {
             >
                 {isSubmitting ? 'Registrando...' : 'Registrar'}
             </Button>
-        </form>
+        </form >
     )
 }
 

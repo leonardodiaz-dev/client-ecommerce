@@ -14,7 +14,7 @@ const IngresosTable = () => {
   const columns: TableColumn<Detalles>[] = [
     {
       name: 'ID',
-      selector: row => row.idDetalle,
+      selector: row => row.id,
       sortable: true,
     },
     {
@@ -24,31 +24,19 @@ const IngresosTable = () => {
     },
     {
       name: 'COLOR',
-      selector: (row) => row.variante.color?.nombre ?? 'No tiene',
+      selector: (row) => row.variant.color?.nombre ?? 'No tiene',
 
       sortable: true,
     },
     {
       name: 'TALLA',
-      selector: (row) => row.variante.talla?.nombre ?? 'No tiene',
+      selector: (row) => row.variant.size?.nombre ?? 'No tiene',
       sortable: true,
     },
     {
       name: 'ARTICULO',
-      selector: row => row.variante.articulo.nombre
+      selector: row => row.variant.article.nombre
     }
-    // {
-    //   name: 'EDITAR',
-    //   cell: row => (
-    //     <button onClick={() => {
-    //       openModal()
-    //       setProveedor(row)
-    //     }}>
-    //       <SquarePen className="cursor-pointer h-6 w-6 ml-3" />
-    //     </button>
-    //   ),
-    //   ignoreRowClick: true,
-    // },
   ];
 
   return (
@@ -62,11 +50,6 @@ const IngresosTable = () => {
           className="min-w-full"
         />
       </div>
-      {/* <Modal isOpen={isModalOpen} handleClose={closeModal} title="Editar Articulo" >
-                {isModalOpen && (
-                    <ProveedorForm proveedor={proveedor} closeModal={closeModal} />
-                )}
-      </Modal> */}
     </>
   )
 }

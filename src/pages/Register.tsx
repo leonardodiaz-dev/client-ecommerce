@@ -1,19 +1,28 @@
 import { useForm } from "react-hook-form"
 import Button from "../components/common/Button"
 import type { UsuarioFormData } from "../interfaces/usuario"
-import { createUsuario } from "../services/usuarios"
+import { createUsuario, loginUsuario } from "../services/usuarios"
 import type { ApiError } from "../interfaces/apiError"
+import { useAuth } from "../context/useAuth"
+import { useNavigate } from "react-router-dom"
 
 const Register = () => {
-    const { register, handleSubmit, reset, formState: { errors, isValid } } = useForm<UsuarioFormData>({
+
+    const { login } = useAuth()
+    const navigate = useNavigate()
+    const { register, handleSubmit, reset, watch, formState: { errors, isValid, isSubmitting } } = useForm<UsuarioFormData>({
         mode: 'onChange'
     })
 
     const onSubmit = async (data: UsuarioFormData) => {
         try {
-            const response = await createUsuario({ ...data, rolNombre: "Cliente" })
+            const res = await createUsuario({ ...data, rolesId: [2] })
+            console.log(res)
+            const response = await loginUsuario(data.email, data.password)
             console.log(response)
+            login(response.user, response.token, response.expires_at)
             reset()
+            navigate("/");
         } catch (error) {
             const apiError = error as ApiError
             console.log(apiError.message)
@@ -76,17 +85,27 @@ const Register = () => {
                 </div>
                 <div className="w-full">
                     <input type="password" id="password" placeholder="Contraseña" className="border border-gray-300 w-full rounded-lg px-2 py-2"
-                        {...register("contrasena", { required: 'La contraseña es obligatoria' })} />
-                    {errors.contrasena && (
-                        <p className="text-sm text-red-500 mt-1">{errors.contrasena.message}</p>
+                        {...register("password", { required: 'La contraseña es obligatoria' })} />
+                    {errors.password && (
+                        <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
+                    )}
+                </div>
+                <div className="w-full">
+                    <input type="password" id="password_confirmation" placeholder="Confirmar Contraseña" className="border border-gray-300 w-full rounded-lg px-2 py-2"
+                        {...register("password_confirmation", {
+                            required: 'La confirmacion de la contraseña es obligatoria',
+                            validate: (value) => value === watch('password') || 'Las contraseñas no coinciden'
+                        })} />
+                    {errors.password && (
+                        <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
                     )}
                 </div>
                 <Button
                     type="submit"
-                    disabled={!isValid}
-                    className={`${isValid ? 'bg-[#B8860B] text-white' : 'bg-gray-400 text-gray-500'} w-full`}
+                    disabled={!isValid || isSubmitting}
+                    className={`${isValid && !isSubmitting ? 'bg-[#B8860B] text-white' : 'bg-gray-400 text-gray-500'} w-full`}
                 >
-                    Registrarme
+                    {isSubmitting ? '...Registrando' : 'Registrar'}
                 </Button>
             </form>
         </div>

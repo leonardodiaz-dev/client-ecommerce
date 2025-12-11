@@ -1,29 +1,27 @@
-import { useSearchParams } from "react-router-dom";
 import type { Marca } from "../../interfaces/marca";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Props = {
     marcas: Marca[]
+    marcaTmp: string[];
+    setMarcaTmp: (value: string[]) => void;
+    setShowFilters: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const FiltroMarca = ({ marcas}: Props) => {
+const FiltroMarca = ({ marcas, marcaTmp, setMarcaTmp, setShowFilters }: Props) => {
 
-    const [searchParams, setSearchParams] = useSearchParams();
     const [open, setOpen] = useState(true);
 
-    const handleChange = (marca: string) => {
-        const current = searchParams.get("marca")?.split(",").filter(Boolean) || [];
-        const updated = current.includes(marca)
-            ? current.filter((nombre) => nombre !== marca)
-            : [...current, marca];
+    const handleChange = (nombre: string) => {
+        const updated = marcaTmp.includes(nombre)
+            ? marcaTmp.filter((m) => m !== nombre)
+            : [...marcaTmp, nombre];
 
-        searchParams.set("marca", updated.join(","));
-        if(updated.length === 0) searchParams.delete("marca")
-        setSearchParams(searchParams);
+        setMarcaTmp(updated);
+        setShowFilters(false)
     };
 
-    const selectedIds = searchParams.get("marca")?.split(",") || [];
 
     return (
         <div className="border-b border-gray-200 pb-2">
@@ -47,13 +45,13 @@ const FiltroMarca = ({ marcas}: Props) => {
                 <div className="flex flex-col gap-2 pl-2 pb-2">
                     {marcas.map((m) => (
                         <label
-                            key={m.idMarca}
+                            key={m.id}
                             className="flex items-center gap-2 cursor-pointer text-gray-700 hover:text-gray-900"
                         >
                             <input
                                 type="checkbox"
                                 className="w-4 h-4 accent-indigo-600 cursor-pointer"
-                                checked={selectedIds.includes(m.nombre.toString())}
+                                 checked={marcaTmp.includes(m.nombre)}
                                 onChange={() => handleChange(m.nombre)}
                             />
                             {m.nombre}

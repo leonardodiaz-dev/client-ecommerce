@@ -14,17 +14,17 @@ export interface Ingreso {
 }
 
 export type IngresoFormData = {
-    proveedorId: number
-    detalles:{
-        varianteId: number
+    supplier_id: number
+    variants:{
+        id: number
         cantidad:number
     }[]
 }
 
 export interface Detalles {
-    idDetalle:number
+    id:number
     cantidad:number
-    variante:Variante
+    variant:Variante
 }
 
 interface Variante {
@@ -32,8 +32,8 @@ interface Variante {
     articuloId: number
     colorId: number
     color: Color
-    articulo: Articulo
+    article: Articulo
     tallaId: number
-    talla: Talla
+    size: Talla
     stock: number
 }

@@ -1,11 +1,11 @@
 import type { AxiosError } from "axios";
 import type { Detalles, Ingreso, IngresoFormData } from "../interfaces/ingreso";
-import apiPrivate from "./apiPrivate";
 import type { ApiError } from "../interfaces/apiError";
+import apiPublic from "./apiPublic";
 
 export const getAllIngresos = async (): Promise<Detalles[]> => {
     try {
-        const response = await apiPrivate.get("/ingresos")
+        const response = await apiPublic.get("/purchases")
         return response.data
     } catch (err) {
         const error = err as AxiosError<ApiError>;
@@ -22,7 +22,7 @@ export const getAllIngresos = async (): Promise<Detalles[]> => {
 
 export const createIngreso = async (ingreso:IngresoFormData):Promise<Ingreso> => {
     try {
-        const response = await apiPrivate.post("/ingresos",ingreso)
+        const response = await apiPublic.post("/purchases",ingreso)
         return response.data
     } catch (err) {
         const error = err as AxiosError<ApiError>;

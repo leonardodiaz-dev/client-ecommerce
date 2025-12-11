@@ -4,42 +4,19 @@ import { getAllColores } from "../../services/colores";
 import type { Color } from "../../interfaces/color";
 import type { Talla } from "../../interfaces/talla";
 import { getAllTallas } from "../../services/tallas";
-import { useEffect } from "react";
 
 
 export default function VariantesForm() {
-  const { control, register, watch } = useFormContext();
+  const { control, register } = useFormContext();
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
-    name: "variantes",
+    name: "variants",
   });
 
-  const { data: colores } = useFetchData<Color>(getAllColores)
+  const { data: colores, loading: loadingColor } = useFetchData<Color>(getAllColores)
   const { data: tallas, loading: loadingTalla } = useFetchData<Talla>(getAllTallas)
-  const variantes = watch("variantes");
-
-  useEffect(() => {
-
-    if (!variantes) return;
-
-    try {
-      const variantesStr = JSON.stringify(variantes);
-      const fieldsStr = JSON.stringify(fields);
-
-      if (variantesStr !== fieldsStr) {
-        replace(variantes);
-      }
-    } catch (err) {
-      console.warn("Error stringify variantes/fields, forzando replace", err);
-      replace(variantes);
-    }
-
-  }, [JSON.stringify(variantes), replace]);
-
-  const loading = loadingTalla
-  if (loading) return <p>Cargando...</p>;
-
+ 
   return (
     <div className="border p-4 rounded-lg">
       <h3 className="text-lg font-semibold mb-3">Variantes</h3>
@@ -47,28 +24,44 @@ export default function VariantesForm() {
       {fields.map((field, index) => (
         <div key={field.id} className="border rounded-lg p-3 mb-4">
           <div className="flex items-center gap-2 mb-3">
-            <select
-              {...register(`variantes.${index}.colorId`)}
-              className="border border-gray-300 rounded-lg px-2 py-1 w-1/3"
-            >
-              <option value="">-- Sin color --</option>
-              {colores.map((c) => (
-                <option key={c.idColor} value={c.idColor}>
-                  {c.nombre}
-                </option>
-              ))}
-            </select>
-            <select
-              {...register(`variantes.${index}.tallaId`)}
-              className="border border-gray-300 rounded-lg px-2 py-1 w-1/3"
-            >
-              <option value="">-- Sin Talla --</option>
-              {tallas.map((t) => (
-                <option key={t.idTalla} value={t.idTalla}>
-                  {t.nombre} - {t.tipo}
-                </option>
-              ))}
-            </select>
+            {
+              (loadingColor || colores.length === 0 || !colores) ? (
+                <div className="flex items-center justify-center py-10">
+                  <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : (
+                <select
+                  {...register(`variants.${index}.color_id`)}
+                  className="border border-gray-300 rounded-lg px-2 py-1 w-1/3"
+                >
+                  <option value="">-- Sin color --</option>
+                  {colores.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nombre}
+                    </option>
+                  ))}
+                </select>
+              )
+            }
+            {
+              (!tallas || tallas.length === 0 || loadingTalla) ? (
+                <div className="flex items-center justify-center py-10">
+                  <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : (
+                <select
+                  {...register(`variants.${index}.size_id`)}
+                  className="border border-gray-300 rounded-lg px-2 py-1 w-1/3"
+                >
+                  <option value="">-- Sin Talla --</option>
+                  {tallas.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.nombre} - {t.tipo}
+                    </option>
+                  ))}
+                </select>
+              )
+            }
 
             <button
               type="button"
@@ -80,15 +73,16 @@ export default function VariantesForm() {
           </div>
 
         </div>
-      ))}
+      ))
+      }
 
       <button
         type="button"
-        onClick={() => append({ idVariante: null, colorId: null, tallaId: null })}
+        onClick={() => append({ id: null, color_id: null, size_id: null })}
         className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-3"
       >
         + Agregar Variante
       </button>
-    </div>
+    </div >
   );
 }

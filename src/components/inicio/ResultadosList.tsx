@@ -22,7 +22,7 @@ const ResultadosList = ({results,showDropdown,loading}: Props) => {
                   </h4>
                   {results.articulos.map((a) => (
                     <a
-                      key={a.idArticulo}
+                      key={a.id}
                       href={`/product/${a.slug}`}
                       className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 cursor-pointer"
                     >
@@ -35,11 +35,6 @@ const ResultadosList = ({results,showDropdown,loading}: Props) => {
                       )}
                       <div>
                         <p className="text-sm text-gray-800">{a.nombre}</p>
-                        {a.precioVenta && (
-                          <p className="text-xs text-gray-500">
-                            S/ {Number(a.precioVenta).toFixed(2)}
-                          </p>
-                        )}
                       </div>
                     </a>
                   ))}
@@ -53,7 +48,7 @@ const ResultadosList = ({results,showDropdown,loading}: Props) => {
                   </h4>
                   {results.marcas.map((m) => (
                     <a
-                      key={m.idMarca}
+                      key={m.id}
                       href={`/search?marca=${encodeURIComponent(m.nombre)}`}
                       className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
@@ -70,13 +65,13 @@ const ResultadosList = ({results,showDropdown,loading}: Props) => {
                   </h4>
                   {results.subsubcategorias.map((ss) => (
                     <a
-                      key={ss.idSubSubcategoria}
+                      key={ss.id}
                       href={`/search?categoria=${encodeURIComponent(ss.nombre)}`}
                       className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       {ss.nombre}{" "}
                       <span className="text-xs text-gray-500">
-                        ({ss.subcategoria.nombre})
+                        ({ss.subcategory.nombre})
                       </span>
                     </a>
                   ))}

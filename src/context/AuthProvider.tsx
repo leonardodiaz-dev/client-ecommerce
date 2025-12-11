@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type { Usuario } from "../interfaces/usuario";
 import { AuthContext } from "./AuthContext";
-import { useNavigate } from "react-router-dom";
 
 interface MyComponentProps {
     children: ReactNode;
@@ -12,7 +11,6 @@ export const AuthProvider = ({ children }: MyComponentProps) => {
     const [user, setUser] = useState<Usuario | null>(null);
     const [loading, setLoading] = useState(true);
     const [token, setToken] = useState<string | null>(null);
-    const navigate = useNavigate()
 
     const logout = useCallback(() => {
         setUser(null);
@@ -20,17 +18,20 @@ export const AuthProvider = ({ children }: MyComponentProps) => {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         localStorage.removeItem("expires_at");
-        navigate("/login")
-    }, [navigate])
-
+        localStorage.removeItem("direccionItem");
+        localStorage.removeItem("direccion");
+    }, [])
 
     useEffect(() => {
         const savedUser = localStorage.getItem('user');
         const savedToken = localStorage.getItem('token');
-        const savedExpiresAt = localStorage.getItem("expires_at");
+        const savedExpiresAt = localStorage.getItem("expires_at"); 
+
         if (savedUser && savedToken && savedExpiresAt) {
-            const exp = parseInt(savedExpiresAt, 10) * 1000;
-            if (Date.now() >= exp) {
+            
+            const expMs = parseInt(savedExpiresAt, 10);
+
+            if (Date.now() >= expMs) {
                 logout();
             } else {
                 setUser(JSON.parse(savedUser));
@@ -44,8 +45,10 @@ export const AuthProvider = ({ children }: MyComponentProps) => {
         const interval = setInterval(() => {
             const savedExpiresAt = localStorage.getItem("expires_at");
             if (savedExpiresAt) {
-                const exp = parseInt(savedExpiresAt, 10) * 1000;
-                if (Date.now() >= exp) {
+                
+                const expMs = parseInt(savedExpiresAt, 10);
+
+                if (Date.now() >= expMs) {
                     logout();
                 }
             }
@@ -54,14 +57,16 @@ export const AuthProvider = ({ children }: MyComponentProps) => {
         return () => clearInterval(interval);
     }, [logout]);
 
-    const login = (userData: Usuario, newToken: string, expiresAt: number) => {
+    const login = (userData: Usuario, newToken: string, expiresAt: string) => {
+
+        const expirationTimestampMs = new Date(expiresAt).getTime();
+
         setUser(userData);
         setToken(newToken);
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('token', newToken);
-        localStorage.setItem("expires_at", expiresAt.toString());
+        localStorage.setItem("expires_at", expirationTimestampMs.toString());
     };
-
 
     return (
         <AuthContext.Provider value={{ user, setUser, token, isAuthenticated: !!user, login, logout, loading }}>

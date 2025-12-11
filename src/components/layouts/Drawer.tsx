@@ -19,7 +19,7 @@ const Drawer = ({ isOpen, onClose, children, position }: DrawerProps) => {
             )}
 
             <div
-                className={`fixed top-0 h-full w-72 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out
+                className={`fixed top-0 h-full w-72 bg-white  overflow-y-auto md:overflow-visible shadow-lg z-50 transform transition-transform duration-300 ease-in-out
           ${position === "left" ? "left-0" : "right-0"}
           ${isOpen ? "translate-x-0" : position === "left" ? "-translate-x-full" : "translate-x-full"}
         `}
