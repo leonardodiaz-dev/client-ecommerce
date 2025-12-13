@@ -49,7 +49,7 @@ const Product = () => {
             articulo.variantes[0]?.color === "N/A") {
             setSelectedVariante(prev => ({
                 ...prev,
-                idVariante: articulo.variantes[0].id,
+                id: articulo.variantes[0].id,
                 stock: articulo.variantes[0].stock
             })
             )
@@ -142,7 +142,7 @@ const Product = () => {
                 <div className="flex flex-col md:flex-row bg-white shadow-2xl rounded-2xl overflow-hidden w-full">
                     <div className="flex justify-center items-center bg-gray-50 p-4 md:w-1/2">
                         <img
-                            src={`${import.meta.env.VITE_BASE_URL}${articulo?.imagen}`}
+                            src={`${import.meta.env.VITE_BASE_URL}storage/${articulo?.imagen}`}
                             alt={articulo?.nombre}
                             className="rounded-lg w-full max-w-[300px] object-contain"
                         />
