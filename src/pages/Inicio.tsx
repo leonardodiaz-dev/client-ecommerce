@@ -11,27 +11,27 @@ const secciones: CategoriaSeccion[] = [
         id: 1,
         nombre: "Tecnología",
         items: [
-            { id: 1, nombre: "Smartwatches", imagen: "./reloj.jpeg", to: "/search?categoria=Smartwatches" },
+            { id: 1, nombre: "Laptops", imagen: "./laptop.jpg", to: "/search?categoria=Laptops" },
             { id: 2, nombre: "Celulares", imagen: "./celular.jpeg", to: "/search?categoria=Celulares" },
-            { id: 3, nombre: "Televisores", imagen: "./televisor.jpeg", to: "/search?categoria=Televisores" },
+            { id: 3, nombre: "Monitores", imagen: "./monitor.jpg", to: "/search?categoria=Monitores" },
         ],
     },
     {
         id: 2,
-        nombre: "Calzado",
+        nombre: "Hogar y cocina",
         items: [
-            { id: 1, nombre: "Zapatillas", imagen: "./zapatillas.jpeg", to: "/search?categoria=Zapatillas hombre" },
-            { id: 2, nombre: "Botas", imagen: "./botas.jpeg", to: "" },
-            { id: 3, nombre: "Sandalias", imagen: "./sandalias.jpg", to: "" },
+            { id: 1, nombre: "Utensilios", imagen: "./utensilios.jpg", to: "/search?categoria=Utensilios" },
+            { id: 2, nombre: "Electrodomesticos", imagen: "./hervidor.jpg", to: "/search?categoria=Pequeños electrodomesticos" },
+            { id: 3, nombre: "Cuadros", imagen: "./cuadro.jpg", to: "/search?categoria=Cuadros" },
         ],
     },
     {
         id: 3,
-        nombre: "Accesorios y Moda",
+        nombre: "Moda",
         items: [
-            { id: 1, nombre: "Mochilas", imagen: "./mochilas.jpg", to: "/search?categoria=Mochilas" },
-            { id: 2, nombre: "Bolsos", imagen: "./bolsos.jpg", to: "/search?categoria=Bolsos" },
-            { id: 3, nombre: "Lentes", imagen: "./gafas.jpg", to: "/search?categoria=Lentes" },
+            { id: 1, nombre: "Zapatillas", imagen: "./zapatillas.jpeg", to: "/search?categoria=Zapatillas" },
+            { id: 2, nombre: "Carteras", imagen: "./carteras.jpg", to: "/search?categoria=Carteras" },
+            { id: 3, nombre: "Gorras", imagen: "./gorras.jpg", to: "/search?categoria=Gorras" },
         ],
     },
 ];
