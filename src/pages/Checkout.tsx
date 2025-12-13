@@ -133,7 +133,7 @@ const Checkout = () => {
             >
               <div className="flex items-center gap-3">
                 <img
-                  src={`${import.meta.env.VITE_BASE_URL}${item.imagen}`}
+                  src={`${import.meta.env.VITE_BASE_URL}storage/${item.imagen}`}
                   alt={item.nombre}
                   className="w-16 h-16 object-cover rounded-md border"
                 />
