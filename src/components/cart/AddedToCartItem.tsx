@@ -20,7 +20,7 @@ const AddedToCartItem = ({ product, onClose }: AddedToCartItemProps) => {
 
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 border border-gray-200 rounded-lg p-4">
                 <img
-                    src={`${import.meta.env.VITE_BASE_URL}${product.imagen}`}
+                    src={`${import.meta.env.VITE_BASE_URL}storage/${product.imagen}`}
                     alt={product.nombre}
                     className="w-32 h-32 object-contain rounded-lg"
                 />
