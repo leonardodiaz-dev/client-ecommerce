@@ -13,19 +13,23 @@ const CartCard = ({ product }: CartCardProps) => {
     const dispatch = useDispatch<AppDispatch>()
     return (
         <div className="flex flex-col sm:flex-row justify-between bg-white items-center border border-gray-300 gap-4 p-4 rounded-lg shadow-sm">
-            
+
             <img
                 className="w-28 h-28 object-contain"
-                src={`${import.meta.env.VITE_BASE_URL}${product?.imagen}`}
+                src={`${import.meta.env.VITE_BASE_URL}storage/${product?.imagen}`}
                 alt={product.nombre}
             />
 
             <div className="flex flex-col items-center sm:items-start gap-1">
                 <p className="text-lg font-semibold">{product.nombre}</p>
                 <p className="text-sm text-gray-600">{product.marca}</p>
-                <p className="text-sm text-gray-600">
-                    Talla: <span className="font-medium">{product.talla}</span>
-                </p>
+                {
+                    product.talla && (
+                        <p className="text-sm text-gray-600">
+                            Talla: <span className="font-medium">{product.talla}</span>
+                        </p>
+                    )
+                }
             </div>
 
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
