@@ -26,6 +26,7 @@ import Success from "./pages/Success"
 import Cancel from "./pages/Cancel"
 import { ToastProvider } from "./context/ToastProvider"
 import SelectRol from "./pages/SelectRol"
+import MisCompras from "./pages/MisCompras"
 
 const App = () => {
   return (
@@ -71,6 +72,7 @@ const App = () => {
             }>
               <Route path="myProfile" element={<Miperfil />} />
               <Route path="addresses" element={<Direcciones />} />
+              <Route path="my-purchases" element={<MisCompras />} />
             </Route>
           </Routes>
         </ToastProvider>
