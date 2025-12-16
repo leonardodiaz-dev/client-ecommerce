@@ -84,20 +84,40 @@ const Register = () => {
                     />
                 </div>
                 <div className="w-full">
-                    <input type="password" id="password" placeholder="Contraseña" className="border border-gray-300 w-full rounded-lg px-2 py-2"
-                        {...register("password", { required: 'La contraseña es obligatoria' })} />
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Contraseña"
+                        className="border border-gray-300 w-full rounded-lg px-2 py-2"
+                        {...register("password", {
+                            required: 'La contraseña es obligatoria',
+                            minLength: {
+                                value: 8,
+                                message: 'La contraseña debe tener al menos 8 caracteres'
+                            },
+                            pattern: {
+                                value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/,
+                                message: 'Debe contener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo (!@#$%).'
+                            }
+                        })}
+                    />
                     {errors.password && (
                         <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
                     )}
                 </div>
                 <div className="w-full">
-                    <input type="password" id="password_confirmation" placeholder="Confirmar Contraseña" className="border border-gray-300 w-full rounded-lg px-2 py-2"
+                    <input
+                        type="password"
+                        id="password_confirmation"
+                        placeholder="Confirmar Contraseña"
+                        className="border border-gray-300 w-full rounded-lg px-2 py-2"
                         {...register("password_confirmation", {
                             required: 'La confirmacion de la contraseña es obligatoria',
                             validate: (value) => value === watch('password') || 'Las contraseñas no coinciden'
-                        })} />
-                    {errors.password && (
-                        <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
+                        })}
+                    />
+                    {errors.password_confirmation && (
+                        <p className="text-sm text-red-500 mt-1">{errors.password_confirmation.message}</p>
                     )}
                 </div>
                 <Button
