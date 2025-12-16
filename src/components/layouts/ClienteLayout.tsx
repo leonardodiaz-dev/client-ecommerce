@@ -11,7 +11,7 @@ export default function ClienteLayout() {
     const links = [
         { to: "/myaccount/myProfile", label: "Mi perfil", icon: <CircleUser size={18} /> },
         { to: "/myaccount/addresses", label: "Direcciones", icon: <MapPinHouse size={18} /> },
-        { to: "/myaccount/myPurchases", label: "Mis compras", icon: <Handbag size={18} /> },
+        { to: "/myaccount/my-purchases", label: "Mis compras", icon: <Handbag size={18} /> },
     ];
 
     return (
